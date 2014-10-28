@@ -1,0 +1,21 @@
+{
+    "name": "sersid/yii2-config",
+    "description": "Yii2 manage configuration from database",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"," config"],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Sersid",
+            "email": "sersONEd@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "sersid\\config\\": ""
+        }
+    }
+}
