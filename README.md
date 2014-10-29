@@ -1,6 +1,6 @@
-Config
+Yii2 Config
 ======
-Yii2 manage configuration from database
+Manage configuration from database
 
 Installation
 ------------
@@ -26,10 +26,10 @@ to the require section of your `composer.json` file.
 
 ### Two
 
-Add migration
+Applying migrations
 
-```sh
-yii migrate --migrationPath=@vendor/sersid/yii2-config/migrations
+```
+yii migrate --migrationPath=@vendor/sersid/config/migrations
 ```
 
 
@@ -55,9 +55,23 @@ Usage
 
 Once the extension is installed, simply use it in your code by  :
 
+#### Set
 ```php
-Yii::$app->config->get('foo'); //null
-Yii::$app->config->get('foo', 'default'); //default
 Yii::$app->config->set('foo', 'bar');
-Yii::$app->config->get('foo', 'default'); //bar
+Yii::$app->config->set('foo', ['bar', 'baz']);
+Yii::$app->config->set(['foo' => 'bar']);
+```
+
+#### Get
+```php
+Yii::$app->config->get('zyx'); // null
+Yii::$app->config->get('zyx', 'default'); // 'default'
+Yii::$app->config->get('foo', 'default'); // 'bar'
+Yii::$app->config->get(['foo' => 'default']);
+```
+
+#### Delete
+```php
+Yii::$app->config->delete('foo');
+Yii::$app->config->deleteAll(); // delete all config
 ```
