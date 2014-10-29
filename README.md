@@ -28,5 +28,10 @@ Usage
 Once the extension is installed, simply use it in your code by  :
 
 ```php
-<?= \sersid\config\AutoloadExample::widget(); ?>
+<?php
+Yii::$app->config->get('foo'); //null
+Yii::$app->config->get('foo', 'default'); //default
+Yii::$app->config->set('foo', 'bar');
+Yii::$app->config->get('foo', 'default'); //bar
+?>
 ```
