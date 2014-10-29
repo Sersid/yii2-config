@@ -7,6 +7,7 @@ use Yii;
 /**
  * This is the model class for table "{{%config}}".
  *
+ * @todo Create interface
  * @property string $key
  * @property string $value
  */

@@ -7,6 +7,7 @@ use yii\base\Exception;
 
 /**
  * Config component
+ * @todo Add caching
  * @author Sersid <sersONEd@gmail.com>
  * @copyright Copyright &copy; www.sersid.ru 2013-
  * @license http://www.opensource.org/licenses/bsd-license.php New BSD License
@@ -185,6 +186,9 @@ class Config extends \yii\base\Component implements ConfigInterface
                 $this->_data[$key] = $val;
             }
             if (count($arInsert) > 0) {
+                /**
+                 * @todo moving to a model
+                 */
                 $model->getDb()->createCommand()
                         ->delete($model->tableName(), ['IN', 'key', $arDelete])
                         ->execute();
@@ -197,11 +201,17 @@ class Config extends \yii\base\Component implements ConfigInterface
             $value = $this->_merge($name, $value);
 
             if (array_key_exists($name, $this->getData()) === false) {
+                /**
+                 * @todo moving to a model
+                 */
                 $model->getDb()->createCommand()->insert($model->tableName(), [
                     'key' => $name,
                     'value' => $value,
                 ]);
             } else {
+                /**
+                 * @todo moving to a model
+                 */
                 $model->getDb()->createCommand()->update($model->tableName(), [
                     'value' => $value,
                 ], 'key=:key', array(':key' => $name));
@@ -239,6 +249,9 @@ class Config extends \yii\base\Component implements ConfigInterface
     {
         if(array_key_exists($name, $this->getData())) {
             $model = $this->getModel();
+            /**
+             * @todo moving to a model
+             */
 			$model->getDb()->createCommand()
 					->delete($model->tableName(), 'key=:key', [':key' => $name]);
 
@@ -252,6 +265,9 @@ class Config extends \yii\base\Component implements ConfigInterface
     public function deleteAll()
     {
         $model = $this->getModel();
+        /**
+         * @todo moving to a model
+         */
         $model->getDb()->createCommand()->delete($model->tableName());
         $this->_data = [];
     }
