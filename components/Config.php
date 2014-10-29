@@ -38,7 +38,7 @@ class Config extends \yii\base\Component implements ConfigInterface
      *
      * @var array
      */
-    public $modelOptions = [];
+    public $modelConfig = [];
 
     /**
      *
@@ -68,7 +68,7 @@ class Config extends \yii\base\Component implements ConfigInterface
     protected function getModel()
     {
         if ($this->model === null) {
-            $this->model = new $this->modelClass($this->modelOptions);
+            $this->model = new $this->modelClass($this->modelConfig);
         }
         return $this->model;
     }
