@@ -166,7 +166,12 @@ class Config extends \yii\base\Component implements ConfigInterface
 	 */
 	public function getAll()
 	{
-		return $this->decode($this->getData());
+        $return = [];
+        foreach ($this->getData() as $key => $data) {
+            $return[$key] = $this->get($key);
+        }
+
+        return $return;
 	}
 
     /**
