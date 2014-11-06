@@ -62,7 +62,7 @@ class Config extends \yii\base\Component implements ConfigInterface
 
     /**
      * Returns the database connection component.
-     * @return \yii\db\Connection the database connection.
+     * @var \yii\db\Connection the database connection.
      */
     private $_db;
 
