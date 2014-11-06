@@ -47,6 +47,7 @@ $config = [
             'tableName' => '{{%config}}', //Config table name
             'idCache' => 'cache', // The ID of the cache component. Default null (no caching)
             'cacheKey' => 'config.component', // The key identifying the value to be cached
+            'cacheDuration' => 360, // The number of seconds in which the cached value will expire. 0 means never expire. Default 0
         ],
     ]
 ];

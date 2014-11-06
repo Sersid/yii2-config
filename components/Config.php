@@ -55,6 +55,12 @@ class Config extends \yii\base\Component implements ConfigInterface
     public $cacheKey = 'config.component';
 
     /**
+     * The number of seconds in which the cached value will expire. 0 means never expire.
+     * @var integer
+     */
+    public $cacheDuration = 0;
+
+    /**
      * Config data
      * @var array
      */
@@ -107,7 +113,7 @@ class Config extends \yii\base\Component implements ConfigInterface
                 $cache = $this->_cache->get($this->cacheKey);
                 if($cache === false) {
                     $this->_data = $this->_getDataFromDb();
-                    $this->_cache->set($this->cacheKey, $this->_data);
+                    $this->_setCache();
                 } else {
                     $this->_data = $cache;
                 }
@@ -133,49 +139,8 @@ class Config extends \yii\base\Component implements ConfigInterface
     private function _setCache()
     {
         if($this->_cache !== null) {
-            $this->_cache->set($this->cacheKey, $this->_data);
+            $this->_cache->set($this->cacheKey, $this->_data, $this->cacheDuration);
         }
-    }
-
-    /**
-     * @example Yii::$app->config->param1;
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return array_key_exists($name, $this->getData()) ? $this->_get($name) : parent::__get($name);
-    }
-
-    /**
-     * @example Yii::$app->config->param1 = "value";
-     * @param string $name
-     * @param mixed $value
-     * @return mixed
-     */
-    public function __set($name, $value)
-    {
-        return array_key_exists($name, $this->getData()) ? $this->set($name) : parent::__set($name, $value);
-    }
-
-    /**
-     * @example isset(Yii::$app->config->param1);
-     * @param string $name
-     * @return boolean
-     */
-    public function __isset($name)
-    {
-        return array_key_exists($name, $this->getData()) ? true : parent::__isset($name);
-    }
-
-    /**
-     * @example unset(Yii::$app->config->param1);
-     * @param string $name
-     * @return self::delete();
-     */
-    public function __unset($name)
-    {
-        return array_key_exists($name, $this->getData()) ? $this->delete($name) : parent::__unset($name);
     }
 
     /**
