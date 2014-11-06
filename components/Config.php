@@ -1,6 +1,7 @@
 <?php
 
 namespace sersid\config\components;
+use Yii;
 use yii\helpers\Json;
 use yii\helpers\ArrayHelper;
 use yii\base\Exception;
@@ -30,21 +31,28 @@ class Config extends \yii\base\Component implements ConfigInterface
     public $coding;
 
     /**
+     * The ID of the connection component
      * @var string
      */
-    public $modelClass = 'sersid\config\models\Config';
+    public $idConnection = 'db';
 
     /**
-     *
-     * @var array
+     * Config table name
+     * @var string
      */
-    public $modelConfig = [];
+    public $tableName = '{{%config}}';
 
     /**
-     *
-     * @var \sersid\config\models\Config
+     * The ID of the cache component
+     * @var string
      */
-    public $model;
+    public $idCache;
+
+    /**
+     * The key identifying the value to be cached
+     * @var string
+     */
+    public $cacheKey = 'config.component';
 
     /**
      * Config data
@@ -53,24 +61,39 @@ class Config extends \yii\base\Component implements ConfigInterface
     private $_data;
 
     /**
+     * Returns the database connection component.
+     * @return \yii\db\Connection the database connection.
+     */
+    private $_db;
+
+    /**
+     * @var \yii\caching\Cache
+     */
+    private $_cache;
+
+    /**
      * @inheritdoc
      */
     public function init()
     {
+        // Get coding
         $this->coding = !empty($this->coding) ? $this->coding : self::CODING_JSON;
-        parent::init();
-    }
 
-    /**
-     * Get model
-     * @return \sersid\config\models\Config
-     */
-    protected function getModel()
-    {
-        if ($this->model === null) {
-            $this->model = new $this->modelClass($this->modelConfig);
+        // Get db component
+        $this->_db = Yii::$app->get($this->idConnection);
+        if(!$this->_db instanceof \yii\db\Connection) {
+            throw new Exception("Config.idConnection \"{$this->idConnection}\" is invalid.");
         }
-        return $this->model;
+
+        // Get cache component
+        if($this->idCache !== NULL) {
+            $this->_cache = Yii::$app->get($this->idCache);
+            if(!$this->_cache instanceof \yii\caching\Cache) {
+                throw new CException("Config.idCache \"{$this->idCache}\" is invalid.");
+            }
+        }
+
+        parent::init();
     }
 
     /**
@@ -80,9 +103,38 @@ class Config extends \yii\base\Component implements ConfigInterface
     public function getData()
     {
         if ($this->_data === null) {
-            $this->_data = ArrayHelper::map($this->getModel()->find()->all(), 'key', 'value');
+            if($this->_cache !== null) {
+                $cache = $this->_cache->get($this->cacheKey);
+                if($cache === false) {
+                    $this->_data = $this->_getDataFromDb();
+                    $this->_cache->set($this->cacheKey, $this->_data);
+                } else {
+                    $this->_data = $cache;
+                }
+            } else {
+                $this->_data = $this->_getDataFromDb();
+            }
         }
         return $this->_data;
+    }
+
+    /**
+     * Get data from database
+     * @return array
+     */
+    private function _getDataFromDb()
+    {
+        return ArrayHelper::map($this->_db->createCommand("SELECT * FROM {$this->tableName}")->queryAll(), 'key', 'value');
+    }
+
+    /**
+     * Set cache
+     */
+    private function _setCache()
+    {
+        if($this->_cache !== null) {
+            $this->_cache->set($this->cacheKey, $this->_data);
+        }
     }
 
     /**
@@ -159,11 +211,10 @@ class Config extends \yii\base\Component implements ConfigInterface
         $data = $this->getData();
         return array_key_exists($name, $data) ? $this->decode($data[$name]) : $default;
     }
-    
+
     /**
-	 * Returns all parameters
-	 * @return array
-	 */
+     * @inheritdoc
+     */
 	public function getAll()
 	{
         $return = [];
@@ -179,8 +230,6 @@ class Config extends \yii\base\Component implements ConfigInterface
      */
     public function set($name, $value = null)
     {
-        $model = $this->getModel();
-
         if (is_array($name)) {
             $arInsert = [];
             $arDelete = [];
@@ -191,38 +240,31 @@ class Config extends \yii\base\Component implements ConfigInterface
                 $this->_data[$key] = $val;
             }
             if (count($arInsert) > 0) {
-                /**
-                 * @todo moving to a model
-                 */
-                $model->getDb()->createCommand()
-                        ->delete($model->tableName(), ['IN', 'key', $arDelete])
+                $this->_db->createCommand()
+                        ->delete($this->tableName, ['IN', 'key', $arDelete])
                         ->execute();
-                
-                $model->getDb()->createCommand()
-                        ->batchInsert($model->tableName(), ['key', 'value'], $arInsert)
+
+                $this->_db->createCommand()
+                        ->batchInsert($this->tableName, ['key', 'value'], $arInsert)
                         ->execute();
             }
         } else {
             $value = $this->_merge($name, $value);
 
             if (array_key_exists($name, $this->getData()) === false) {
-                /**
-                 * @todo moving to a model
-                 */
-                $model->getDb()->createCommand()->insert($model->tableName(), [
+                $this->_db->createCommand()->insert($this->tableName, [
                     'key' => $name,
                     'value' => $value,
                 ]);
             } else {
-                /**
-                 * @todo moving to a model
-                 */
-                $model->getDb()->createCommand()->update($model->tableName(), [
+                $this->_db->createCommand()->update($this->tableName, [
                     'value' => $value,
                 ], 'key=:key', array(':key' => $name));
             }
             $this->_data[$name] = $value;
         }
+
+        $this->_setCache();
     }
 
     /**
@@ -253,15 +295,13 @@ class Config extends \yii\base\Component implements ConfigInterface
     public function delete($name)
     {
         if(array_key_exists($name, $this->getData())) {
-            $model = $this->getModel();
-            /**
-             * @todo moving to a model
-             */
-			$model->getDb()->createCommand()
-					->delete($model->tableName(), 'key=:key', [':key' => $name]);
+            $this->_db->createCommand()
+					->delete($this->tableName, 'key=:key', [':key' => $name]);
 
 			unset($this->_data[$name]);
 		}
+
+        $this->_setCache();
     }
 
     /**
@@ -269,12 +309,10 @@ class Config extends \yii\base\Component implements ConfigInterface
      */
     public function deleteAll()
     {
-        $model = $this->getModel();
-        /**
-         * @todo moving to a model
-         */
-        $model->getDb()->createCommand()->delete($model->tableName());
+        $this->_db->createCommand()->delete($this->tableName);
         $this->_data = [];
+
+        $this->_cache->delete($this->cacheKey);
     }
 
     /**

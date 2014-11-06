@@ -14,6 +14,12 @@ interface ConfigInterface
 	 * @return mixed
 	 */
     public function get($name, $default = null);
+
+    /**
+     * Returns all parameters
+     * @return array
+     */
+    public function getAll();
     
     /**
 	 * Set config vars
