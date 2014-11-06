@@ -43,8 +43,10 @@ $config = [
         'config' => [
             'class' => 'sersid\config\components\Config',
             'coding' => '...', // json of serialize. Default 'json'
-            'modelClass' => '...', // ActiveRecord model. Default 'sersid\config\models\Config'
-            'modelConfig' => [], //name-value pairs that will be used to initialize the object properties
+            'idConnection' => 'db', // The ID of the connection component
+            'tableName' => '{{%config}}', //Config table name
+            'idCache' => 'cache', // The ID of the cache component. Default null (no caching)
+            'cacheKey' => 'config.component', // The key identifying the value to be cached
         ],
     ]
 ];
