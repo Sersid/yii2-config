@@ -95,7 +95,7 @@ class Config extends \yii\base\Component implements ConfigInterface
         if($this->idCache !== NULL) {
             $this->_cache = Yii::$app->get($this->idCache);
             if(!$this->_cache instanceof \yii\caching\Cache) {
-                throw new CException("Config.idCache \"{$this->idCache}\" is invalid.");
+                throw new Exception("Config.idCache \"{$this->idCache}\" is invalid.");
             }
         }
 
