@@ -220,13 +220,9 @@ class Config extends \yii\base\Component implements ConfigInterface
                 $this->_db->createCommand()->insert($this->tableName, [
                     'key' => $name,
                     'value' => $value,
-                ])
-                    ->execute();
+                ])->execute();
             } else {
-                $this->_db->createCommand()->update($this->tableName, [
-                    'value' => $value,
-                ], 'key=:key', array(':key' => $name))
-                    ->execute();
+                $this->_db->createCommand()->update($this->tableName, ['value' => $value], ['key' => $name])->execute();
             }
             $this->_data[$name] = $value;
         }
