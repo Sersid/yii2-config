@@ -1,7 +1,4 @@
 <?php
-
-namespace sersid\config\migrations;
-
 use yii\db\Schema;
 use yii\db\Migration;
 

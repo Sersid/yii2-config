@@ -29,7 +29,7 @@ to the require section of your `composer.json` file.
 Applying migrations
 
 ```
-yii migrate --migrationPath=@vendor/sersid/config/migrations
+yii migrate --migrationPath=@vendor/sersid/yii2-config/migrations
 ```
 
 
@@ -77,4 +77,14 @@ Yii::$app->config->get(['foo' => 'default']);
 ```php
 Yii::$app->config->delete('foo');
 Yii::$app->config->deleteAll(); // delete all config
+```
+
+
+Uninstall
+------------
+
+Applying migrations
+
+```
+yii migrate/down --migrationPath=@vendor/sersid/yii2-config/migrations
 ```
